@@ -28,10 +28,12 @@ def noMovementForTime():
             return True
 
 def vibrateForTime(seconds):
+    timeout = time.time() + seconds
     GPIO.output(motorPin, GPIO.HIGH)
-    countdownEnd = time.time()
-    while (time.time() - countdownStart) < seconds:
-        continue
+    while True:
+        if (time.time() > timeout):
+            break
+        time.sleep(0.5)
     GPIO.output(motorPin, GPIO.LOW)
 
 while True:
