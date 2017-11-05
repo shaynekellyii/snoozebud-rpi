@@ -19,14 +19,15 @@ CS = 25
 mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
 while True:
+    checkForMovement()
+    vibrateForTime(3)
+
+def checkForMovement():
     if movementDetected == False:
         countdownStart = time.time()
         while (time.time() - countdownStart) < DELAY_SEC:
             if movementDetected == True:
                 return
-
-    vibrateForTime(3)
-
 
 def movementDetected():
     return (mcp.read_adc(0) > 1)
