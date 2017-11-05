@@ -34,6 +34,5 @@ def vibrateForTime(seconds):
     GPIO.output(motorPin, GPIO.LOW)
 
 while True:
-    vibrateForTime(3)
     if noMovementForTime() == True:
         vibrateForTime(3)
