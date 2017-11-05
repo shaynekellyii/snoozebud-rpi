@@ -1,3 +1,4 @@
+from threading import Timer
 import RPi.GPIO as GPIO
 import time
 import Adafruit_GPIO.SPI as SPI
@@ -19,18 +20,16 @@ CS = 25
 mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
 def noMovementForTime():
-    if mcp.read_adc(0) <= 1:
-        countdownStart = time.time()
-        while (time.time() - countdownStart) < DELAY_SEC:
-            reading = mcp.read_adc(0)
-            print(reading)
-            if reading > 1:
-                return False
-    return True
+    timeout = time.time() + DELAY_SEC
+    while True:
+        if mcp.read_adc(0) > 10:
+            return False
+        if time.time() > timeout:
+            return True
 
 def vibrateForTime(seconds):
     GPIO.output(motorPin, GPIO.HIGH)
-    countdownStart = time.time()
+    countdownEnd = time.time()
     while (time.time() - countdownStart) < seconds:
         continue
     GPIO.output(motorPin, GPIO.LOW)
@@ -38,3 +37,4 @@ def vibrateForTime(seconds):
 while True:
     if noMovementForTime() == True:
         vibrateForTime(3)
+
