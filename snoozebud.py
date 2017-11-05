@@ -22,7 +22,9 @@ def noMovementForTime():
     if mcp.read_adc(0) <= 1:
         countdownStart = time.time()
         while (time.time() - countdownStart) < DELAY_SEC:
-            if mcp.read_adc(0) > 1:
+            reading = mcp.read_adc(0)
+            print(reading)
+            if reading > 1:
                 return False
     return True
 
