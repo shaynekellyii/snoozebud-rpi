@@ -19,7 +19,7 @@ CS = 25
 mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
 def noMovementForTime():
-    if mcp.read_adc(0) < 1:
+    if mcp.read_adc(0) <= 1:
         countdownStart = time.time()
         while (time.time() - countdownStart) < DELAY_SEC:
             if mcp.read_adc(0) > 1:
@@ -34,5 +34,6 @@ def vibrateForTime(seconds):
     GPIO.output(motorPin, GPIO.LOW)
 
 while True:
+    vibrateForTime(3)
     if noMovementForTime() == True:
         vibrateForTime(3)
