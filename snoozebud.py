@@ -3,9 +3,10 @@ import RPi.GPIO as GPIO
 import time
 import spidev
 import json
+from notif import send_notif
 
 DELAY_SEC = 3
-SENSITIVITY = 3
+SENSITIVITY = 9
 DEBUG = 1
 
 spi = spidev.SpiDev()
@@ -20,7 +21,10 @@ GPIO.output(motorPin, GPIO.LOW)
 # Read config file
 with open('config.json') as data_file:
     data = json.load(data_file)
-    print(data)
+    SENSITIVITY = data["sensitivity"]
+    FCM_ID = data["firebase_id"]
+    print("Sensitivity: {0}".format(SENSITIVITY))
+    print("FCM ID: {0}".format(FCM_ID))
 
 def read_adc(adc_num):
     r = spi.xfer2([1,(8+adc_num)<<4,0])
@@ -60,16 +64,15 @@ def monitorForTime():
             print("Difference 1: {0}".format(max_reading_1-min_reading_1))
             print("Difference 2: {0}".format(max_reading_2-min_reading_2))
             print("")
-            return max_reading_1
+            return max(max_reading_1-min_reading_1, max_reading_2-min_reading_2)
 
 def noMovementForTime():
     print("Starting to monitor")
     timeout = time.time() + DELAY_SEC
     while True:
         max_reading = monitorForTime();
-        if max_reading > SENSITIVITY:
+        if max_reading >= SENSITIVITY:
             print("Movement detected, monitoring done.")
-            #print(max_reading)
             return False
         else:
             print("Timer expired with no movement detected")
@@ -100,13 +103,21 @@ def vibrateForTime(seconds):
     GPIO.output(motorPin, GPIO.LOW)
 
 def main():
+    miss_count = 0
     while True:
         #print("Voltage level: {0}".format(read_adc(1)))
         #time.sleep(0.2)
         noMovement = noMovementForTime()
         if noMovement == True:
-            vibrateForTime(3)
-	    time.sleep(1)
+            miss_count += 1
+            if miss_count >= 3:
+                vibrateForTime(3)
+                print("Firebase response:")
+                send_notif(FCM_ID)
+                time.sleep(1)
+                miss_count = 0
+        else:
+            miss_count = 0
 
 try:
     main()
