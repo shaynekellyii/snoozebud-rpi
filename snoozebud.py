@@ -2,6 +2,7 @@ from threading import Timer
 import RPi.GPIO as GPIO
 import time
 import spidev
+import json
 
 DELAY_SEC = 3
 SENSITIVITY = 3
@@ -15,6 +16,11 @@ motorPin = 17
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(motorPin, GPIO.OUT)
 GPIO.output(motorPin, GPIO.LOW)
+
+# Read config file
+with open('config.json') as data_file:
+    data = json.load(data_file)
+    print(data)
 
 def read_adc(adc_num):
     r = spi.xfer2([1,(8+adc_num)<<4,0])
